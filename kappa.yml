@@ -2,10 +2,10 @@
 name: AMImmaculate
 environments:
   <your_env>:
-    profile: <your_profile> 
+    profile: <your_profile>
     region: us-east-1
     environment_variables:
-      allowed_age: 90
+      allowed_age: "90"
     policy:
       statements:
         - Effect: Allow
@@ -21,8 +21,8 @@ environments:
         enabled: true
 lambda:
   description: AMI cleaner for unused/old images
-  handler: simple.handler
+  handler: AMImmaculate.lambda_handler
   runtime: python2.7
-  memory_size: 512
-  timeout: 3
+  memory_size: 128
+  timeout: 30
   log_retention_policy: 7
