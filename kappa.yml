@@ -1,0 +1,27 @@
+---
+name: AMImmaculate
+environments:
+  <your_env>:
+    profile: <your_profile> 
+    region: us-east-1
+    environment_variables:
+      allowed_age: 90
+    policy:
+      statements:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "logs:*"
+            - "ec2:Describe*"
+    event_sources:
+      - arn: arn:aws:events:us-east-1:<your_account_id>:rule/kappa-cron
+        schedule: rate(1 day)
+        description: cron to run this lambda function every day
+        enabled: true
+lambda:
+  description: AMI cleaner for unused/old images
+  handler: simple.handler
+  runtime: python2.7
+  memory_size: 512
+  timeout: 3
+  log_retention_policy: 7
