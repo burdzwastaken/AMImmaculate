@@ -13,6 +13,7 @@ environments:
           Action:
             - "logs:*"
             - "ec2:Describe*"
+            - "ec2:DeregisterImage"
     event_sources:
       - arn: arn:aws:events:us-east-1:<your_account_id>:rule/kappa-cron
         schedule: rate(1 day)
