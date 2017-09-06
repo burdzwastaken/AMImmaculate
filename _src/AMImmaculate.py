@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         print "About to deregister the following AMIs in %s:" % region
         print my_images_dict
 
-        for image in image.values():  
+        for image in my_images_dict.values():  
             created_date = datetime.strptime(
                 image.creation_date, "%Y-%m-%dT%H:%M:%S.000Z")
             if created_date < allowed_age:
