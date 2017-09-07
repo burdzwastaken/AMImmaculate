@@ -5,7 +5,7 @@ environments:
     profile: <your_profile>
     region: us-east-1
     environment_variables:
-      allowed_age: "90"
+      allowedAge: "90"
     policy:
       statements:
         - Effect: Allow
