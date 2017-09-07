@@ -7,7 +7,7 @@ client = boto3.client('ec2')
 ec2 = boto3.resource('ec2', 'us-east-1')
 ec2Regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
 ownerID = boto3.client('sts').get_caller_identity().get('Account')
-allowedAge = datetime.now()-timedelta(days=int(os.environ['allowed_age'])) 
+allowedAge = datetime.now()-timedelta(days=int(os.environ['allowedAge'])) 
 
 def lambda_handler(event, context):
 
