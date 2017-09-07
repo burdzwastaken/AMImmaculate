@@ -1,28 +1,36 @@
 import boto3
 import os
 from datetime import datetime, timedelta
+from itertools import chain
 
 client = boto3.client('ec2')
 ec2 = boto3.resource('ec2', "us-east-1")
-ec2_regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
-owner_id = boto3.client('sts').get_caller_identity().get('Account')
-allowed_age = datetime.now()-timedelta(days=int(os.environ['allowed_age'])) 
+ec2Regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
+ownerID = boto3.client('sts').get_caller_identity().get('Account')
+allowedAge = datetime.now()-timedelta(days=int(os.environ['allowed_age'])) 
 
 def lambda_handler(event, context):
 
-    for region in ec2_regions:
+    for region in ec2Regions:
         conn = boto3.resource('ec2', region_name=region)
-        my_images = conn.images.filter(Owners=[owner_id])
-        good_images = set([instance.image_id for instance in conn.instances.all()])  
-        print "Images to exclude from deregistering in %s:" % region
-        print good_images
+        myImages = conn.images.filter(Owners=[ownerID])
 
-        my_images_dict = {image.id: image for image in my_images if image.id not in good_images}  
+        usedImages = set([instance.image_id for instance in conn.instances.all()])
+        print "Used images to exclude from deregistering in %s:" % region
+        print usedImages
+
+        exclusionTags = [{'Name':'tag:Deregister', 'Values':['false']}]
+        taggedImages = set([image.id for image in conn.images.filter(Filters=exclusionTags)])
+        print "Tagged images to exclude from deregistering in %s:" % region
+        print taggedImages
+
+        deregisterList = {image.id: image for image in myImages if image.id not in chain(usedImages, taggedImages)}
+
         print "About to deregister the following AMIs in %s:" % region
-        print my_images_dict
+        print deregisterList
 
-        for image in my_images_dict.values():  
-            created_date = datetime.strptime(
+        for image in deregisterList.values():
+            createdDate = datetime.strptime(
                 image.creation_date, "%Y-%m-%dT%H:%M:%S.000Z")
-            if created_date < allowed_age:
+            if createdDate < allowedAge:
                 image.deregister()
