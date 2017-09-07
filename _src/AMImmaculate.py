@@ -25,7 +25,6 @@ def lambda_handler(event, context):
         print taggedImages
 
         deregisterList = {image.id: image for image in myImages if image.id not in chain(usedImages, taggedImages)}
-
         print "About to deregister the following AMIs in %s:" % region
         print deregisterList
 
