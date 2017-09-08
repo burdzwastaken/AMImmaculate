@@ -19,7 +19,7 @@ def lambda_handler(event, context):
         print "Used images to exclude from deregistering in %s:" % region
         print usedImages
 
-        exclusionTags = [{'Name':'tag:Deregister', 'Values':['false']}]
+        exclusionTags = [{'Name':'tag:Name', 'Values':['important-amis-*']}]
         taggedImages = set([image.id for image in conn.images.filter(Filters=exclusionTags)])
         print "Tagged images to exclude from deregistering in %s:" % region
         print taggedImages
