@@ -1,5 +1,6 @@
 import boto3
 import os
+import re
 from datetime import datetime, timedelta
 from itertools import chain
 
@@ -25,11 +26,24 @@ def lambda_handler(event, context):
         print taggedImages
 
         deregisterList = {image.id: image for image in myImages if image.id not in chain(usedImages, taggedImages)}
-        print "About to deregister the following AMIs in %s:" % region
+        print "AMIs to be degegistered:"
         print deregisterList
+        print "Deregistering AMIs in %s:" % region
 
         for image in deregisterList.values():
             createdDate = datetime.strptime(
                 image.creation_date, "%Y-%m-%dT%H:%M:%S.000Z")
             if createdDate < allowedAge:
                 image.deregister()
+
+        myImages = conn.images.filter(Owners=[ownerID])
+        images = [image.id for image in myImages]  
+        for snapshot in conn.snapshots.filter(OwnerIds=[ownerID]):  
+            r = re.match(r".*for (ami-.*) from.*", snapshot.description)
+            if r:
+                if r.groups()[0] not in images:
+                    print "Deleting snapshots in %s:" % region
+                    print "Snapshot to be deleted:"
+                    print snapshot
+                    snapshot.delete()
+
