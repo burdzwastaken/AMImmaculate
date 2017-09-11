@@ -36,13 +36,13 @@ def lambda_handler(event, context):
             if createdDate < allowedAge:
                 image.deregister()
 
+        print "Deleting snapshots in %s:" % region
         myImages = conn.images.filter(Owners=[ownerID])
         images = [image.id for image in myImages]  
         for snapshot in conn.snapshots.filter(OwnerIds=[ownerID]):  
             r = re.match(r".*for (ami-.*) from.*", snapshot.description)
             if r:
                 if r.groups()[0] not in images:
-                    print "Deleting snapshots in %s:" % region
                     print "Snapshot to be deleted:"
                     print snapshot
                     snapshot.delete()
